@@ -353,13 +353,6 @@ end
 -- Raw SQL
 -- ---------------------------------------------------------------------------
 
-local function isBlocked(stmtUpper)
-    for _, prefix in ipairs(Config.BlockedStatements or {}) do
-        if stmtUpper:sub(1, #prefix) == prefix then return prefix end
-    end
-    return nil
-end
-
 function DB.rawQuery(src, payload)
     local script = tostring(payload.sql or '')
     if U.trim(script) == '' then return { ok = false, error = 'Empty query.' } end
@@ -369,7 +362,7 @@ function DB.rawQuery(src, payload)
     if #statements > 25 then return { ok = false, error = 'Too many statements (max 25 per run).' } end
 
     for _, stmt in ipairs(statements) do
-        local blocked = isBlocked(U.statementUpper(stmt))
+        local blocked = U.blockedStatement(stmt)
         if blocked then
             A.log(src, 'SQL_BLOCKED', { sql = stmt, success = false, error = 'blocked: ' .. blocked })
             return { ok = false, error = ('%s statements are blocked in CodySQL.'):format(blocked) }

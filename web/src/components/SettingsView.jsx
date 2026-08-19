@@ -56,7 +56,7 @@ export default function SettingsView({ perms, theme, setTheme }) {
           <div className="panel-body">
             CodySQL — open-source in-game database manager for FiveM.<br />
             Docs, issues and updates:{' '}
-            <span style={{ fontFamily: 'var(--mono)', color: 'var(--text)' }}>github.com/cody-raves/codysql</span>
+            <span style={{ fontFamily: 'var(--mono)', color: 'var(--text)' }}>github.com/cody-raves/CodySQL</span>
           </div>
         </div>
       </div>

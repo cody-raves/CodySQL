@@ -124,6 +124,17 @@ function U.statementUpper(stmt)
     return stmt:upper():match('^%s*(.-)%s*$')
 end
 
+-- Returns the matching Config.BlockedStatements prefix if this statement is
+-- forbidden, or nil if it's allowed. Every execution path (raw editor and the
+-- .sql file runner alike) must run statements through this.
+function U.blockedStatement(stmt)
+    local upper = U.statementUpper(stmt)
+    for _, prefix in ipairs(Config.BlockedStatements or {}) do
+        if upper:sub(1, #prefix) == prefix then return prefix end
+    end
+    return nil
+end
+
 -- ---------------------------------------------------------------------------
 -- Misc
 -- ---------------------------------------------------------------------------

@@ -7,37 +7,29 @@ local A = CodySQL.audit
 
 -- ---------------------------------------------------------------------------
 -- Listing
--- FiveM Lua has no directory-listing native, so we shell out (`dir` / `ls`)
--- against the resource's sql/ folder. If that's blocked on your host, create
--- sql/_index.txt with one filename per line and CodySQL uses that instead.
+-- Uses the sandboxed io.readdir() resource-directory API with a resource mount
+-- path (@codysql/sql), so no OS commands are ever executed. If readdir is
+-- unavailable, create sql/_index.txt with one filename per line as a fallback.
 -- ---------------------------------------------------------------------------
-
-local function sqlDir()
-    return GetResourcePath(GetCurrentResourceName()) .. '/sql'
-end
 
 local function listDir()
     local names = {}
+    local resource = GetCurrentResourceName()
 
-    local isWindows = (os.getenv('OS') or ''):find('Windows') ~= nil
-    local cmd
-    if isWindows then
-        cmd = ('dir /b "%s"'):format(sqlDir():gsub('/', '\\'))
-    else
-        cmd = ('ls -1 "%s"'):format(sqlDir())
-    end
-
-    local ok, pipe = pcall(io.popen, cmd)
-    if ok and pipe then
-        for line in pipe:lines() do
-            names[#names + 1] = U.trim(line)
+    -- Guard the whole read: io.readdir is missing on older builds, and a failed
+    -- iteration must fall through to _index.txt rather than error the request.
+    pcall(function()
+        local dir = io.readdir(('@%s/sql'):format(resource))
+        if not dir then return end
+        for entry in dir:lines() do
+            names[#names + 1] = U.trim(entry)
         end
-        pipe:close()
-    end
+        dir:close()
+    end)
 
     if #names == 0 then
         -- Fallback: manifest file maintained by hand
-        local index = LoadResourceFile(GetCurrentResourceName(), 'sql/_index.txt')
+        local index = LoadResourceFile(resource, 'sql/_index.txt')
         if index then
             for line in index:gmatch('[^\r\n]+') do
                 names[#names + 1] = U.trim(line)
@@ -107,6 +99,23 @@ function S.run(src, payload)
 
     local statements = U.splitStatements(content)
     if #statements == 0 then return { ok = false, error = 'File contains no statements.' } end
+
+    -- Same blocked-statement policy as the raw editor: a privilege statement is
+    -- refused whether it's typed by hand or shipped inside a .sql file.
+    for i, stmt in ipairs(statements) do
+        local blocked = U.blockedStatement(stmt)
+        if blocked then
+            A.log(src, 'SQL_BLOCKED', {
+                file = payload.name, sql = stmt, success = false,
+                error = ('blocked: %s (statement %d)'):format(blocked, i),
+            })
+            return {
+                ok = false,
+                error = ('%s statements are blocked in CodySQL (statement %d of %s).')
+                    :format(blocked, i, payload.name),
+            }
+        end
+    end
 
     local started = GetGameTimer()
 

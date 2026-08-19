@@ -21,11 +21,12 @@ NUI (React, sandboxed)
 - **Claim permissions.** The client sends requests; the server decides. A modified NUI can draw whatever buttons it likes — the server still checks ACE on each action.
 - **Name arbitrary identifiers.** Table and column names in requests are matched against the schema the server itself discovered (`SHOW TABLE STATUS`, `SHOW FULL COLUMNS`). Unknown identifiers are rejected before any SQL is built.
 - **Touch the filesystem.** SQL files are read only from `codysql/sql/` with a strict filename whitelist; backups are written only to `codysql/backups/`. No client-supplied paths, ever.
+- **Run OS commands or load remote code.** Directory listing uses FiveM's sandboxed `io.readdir()` resource-directory API. CodySQL executes no shell commands, spawns no child processes, and downloads nothing at runtime.
 
 ## What the server enforces
 
 - **Parameterized values** everywhere a value can come from a person.
-- **Blocked statements** in the raw SQL editor: `GRANT`, `CREATE USER`, `DROP DATABASE`, `SET GLOBAL`, and friends (see `Config.BlockedStatements`). These have no business in an in-game tool.
+- **Blocked statements** on every execution path — the raw SQL editor *and* the `.sql` file runner both refuse `GRANT`, `CREATE USER`, `DROP DATABASE`, `SET GLOBAL`, and friends (see `Config.BlockedStatements`). These have no business in an in-game tool, whether typed by hand or shipped inside a file.
 - **Protected tables**: `codysql_audit` (plus anything you add to `Config.ProtectedTables`) is refused by every write path and hidden from the browser.
 - **Typed confirmations** for destructive operations — dropping or emptying a table requires typing its name.
 - **Rate limiting** per player, so a stuck client can't hammer the database.

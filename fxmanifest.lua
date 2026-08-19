@@ -3,9 +3,9 @@ game 'gta5'
 
 name 'codysql'
 author 'Cody & contributors'
-description 'In-game MySQL/MariaDB manager for FiveM — browse, edit, query, run SQL files, audit, and back up your live database without leaving the game.'
+description 'In-game MySQL/MariaDB manager for FiveM - browse, edit, query, run SQL files, audit, and back up your live database without leaving the game.'
 version '0.1.0'
-repository 'https://github.com/cody-raves/codysql'
+repository 'https://github.com/cody-raves/CodySQL'
 lua54 'yes'
 
 shared_script 'config.lua'

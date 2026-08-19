@@ -1,0 +1,10 @@
+# Node
+web/node_modules/
+
+# Backups created at runtime (never commit server data)
+backups/**/*.sql
+backups/**/index.json
+
+# Local scratch
+*.log
+.claude/

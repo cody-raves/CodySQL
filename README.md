@@ -58,7 +58,7 @@ CodySQL is a generic MySQL/MariaDB manager. It discovers your tables dynamically
 
 ## Installation
 
-1. Download the [latest release](https://github.com/cody-raves/codysql/releases) (or clone and build — see [Contributing](CONTRIBUTING.md)).
+1. Download the [latest release](https://github.com/cody-raves/CodySQL/releases) (or clone and build — see [Contributing](CONTRIBUTING.md)).
 2. Put the `codysql` folder in your server's `resources/`.
 3. Add to your `server.cfg`, **after** oxmysql:
 
@@ -125,7 +125,7 @@ codysql/sql/
 
 Open **SQL Files** in the UI, pick a file, review its contents, execute. Statements are split with a real parser (quotes, comments, and semicolons-in-strings are handled). Each run is stored in the audit log with the exact SQL that was executed.
 
-> Directory listing uses a small shell call on the server. If your host blocks that, create `sql/_index.txt` with one filename per line and CodySQL will use it instead.
+> Files are discovered through FiveM's sandboxed `io.readdir()` resource-directory API. CodySQL never executes operating-system commands and never loads code from remote sources. If `io.readdir` is unavailable on your build, create `sql/_index.txt` with one filename per line and CodySQL will use that instead.
 
 ## Backups
 
@@ -143,7 +143,6 @@ Honest limitations, so you can plan around them:
 - [ ] Column & index editing (add/modify/drop columns from the Structure tab)
 - [ ] Foreign-key jump (click a `citizenid`, land on that player's row)
 - [ ] Auto-refresh with cell change highlighting
-- [ ] SQL syntax highlighting in the query editor
 
 ## FAQ
 
